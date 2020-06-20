@@ -30,8 +30,6 @@ variable pdamp equal 5.0
 variable Nevery equal 100
 variable Nfreq equal 50000
 variable Nrepeat equal 500
-cutoff value = Rcut
-  Rcut = 2.5
 
 reset_timestep 0
 
@@ -50,7 +48,7 @@ undump  dumpnpt
 #Using Nvt to calculate the rdf
 
 fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
-compute     rdfnvt all rdf 100 * 3 cutoff 5.0
+compute     rdfnvt all rdf 100 * 3 2.5 5.0
 fix rdfnvt all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf mode vector
 compute msdnvt all msd com yes average yes
 dump       dumpnvt all atom 1000 nvt.out.dump

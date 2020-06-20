@@ -30,6 +30,9 @@ variable pdamp equal 5.0
 variable Nevery equal 100
 variable Nfreq equal 50000
 variable Nrepeat equal 500
+cutoff value = Rcut
+  Rcut = 2.5
+
 reset_timestep 0
 
 #Using Npt to Calculate the properties

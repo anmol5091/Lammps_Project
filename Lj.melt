@@ -48,7 +48,7 @@ undump  dumpnpt
 #Using Nvt to calculate the rdf
 
 fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
-compute     rdfnvt all rdf 100 * 3 2.5 5.0
+compute     rdfnvt all rdf 100 * 3 cutoff 2.5
 fix rdfnvt all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf mode vector
 compute msdnvt all msd com yes average yes
 dump       dumpnvt all atom 1000 nvt.out.dump

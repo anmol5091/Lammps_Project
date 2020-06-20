@@ -11,34 +11,33 @@ region      atomblock block INF INF INF INF INF INF units box  #dimensions for t
 create_atoms	1 random 512 523383 atomblock  
 
 mass		1 1.0
-
-velocity	all create 3.0 87287
-
-pair_style	lj/cut 2.5
-pair_coeff	1 1 1.0 1.0 2.5  # epsilon sigma and rcut is defined repectively
+pair_style	lj/cut 3.5
+pair_coeff	1 1 3.0 1.0 2.5  # epsilon sigma and rcut is defined repectively
 
 minimize  1.0e-4 1.0e-6 100 1000
 
 neighbor	0.3 bin   #skin factor is taken to 0.3 
 neigh_modify	every 20 delay 0 check no
 timestep 0.005    #default for lj 
-variable N equal 100
+variable N equal 1000
 variable tempext equal 0.3
 variable tdamp equal 1.0
 variable pext equal 1.0 
 variable pdamp equal 5.0
 variable Nevery equal 100
-variable Nfreq equal 50000
-variable Nrepeat equal 500
+variable Nfreq equal 100000
+variable Nrepeat equal 100
+
 reset_timestep 0
 
 #Using Npt to Calculate the properties
-
-fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
+velocity	all create ${tempext} 87287   # check this command.
 dump		dumpnpt all atom 1000 npt.out.dump
 thermo		${N}
 thermo_style custom step pe ke etotal press temp vol density lx ly lz
 restart 50000 restart1npt.out restart2npt.out 
+
+fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
 run		  300000
 unfix   nptid
 undump  dumpnpt
@@ -46,7 +45,6 @@ undump  dumpnpt
 
 #Using Nvt to calculate the rdf
 
-fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
 compute     rdfnvt all rdf 100 
 fix rdfnvt all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf mode vector
 compute msdnvt all msd com yes average yes
@@ -54,6 +52,11 @@ dump       dumpnvt all atom 1000 nvt.out.dump
 thermo    ${N}
 thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
 restart 50000 restart1nvt.out restart2nvt.out 
+
+fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
 run       300000
 unfix     nvtid
 undump    dumpnvt
+unfix     rdfnvt
+uncompute rdfnvt
+uncompute msdnvt

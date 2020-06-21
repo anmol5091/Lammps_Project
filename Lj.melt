@@ -4,11 +4,11 @@ units		lj #reduced unit
 atom_style	atomic  
 
 lattice		fcc 0.8442
-region		box block 0 20 0 20 0 20  #dimensions of the block
+region		box block 0 10 0 10 0 10  #dimensions of the block
 create_box	1 box    
 
 region      atomblock block INF INF INF INF INF INF units box  #dimensions for the atom block
-create_atoms	1 random 512 523383 atomblock  
+create_atoms	1 random 2000 523383 atomblock  
 
 mass		1 1.0
 pair_style	lj/cut 3.5

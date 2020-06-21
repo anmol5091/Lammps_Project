@@ -12,7 +12,10 @@ create_atoms	1 random 512 523383 atomblock
 
 mass		1 1.0
 pair_style	lj/cut 3.5
-pair_coeff	1 1 3.0 1.0 2.5  # epsilon sigma and rcut is defined repectively
+label epsilonloop
+variable a loop 11
+variable    epsilon equal 0.3+($a-1)*0.3 
+pair_coeff	1 1 ${epsilon} 1.0 2.5  # epsilon sigma and rcut is defined repectively
 
 minimize  1.0e-4 1.0e-6 100 1000
 
@@ -31,7 +34,7 @@ variable Nrepeat equal 100
 reset_timestep 0
 
 #Using Npt to Calculate the properties
-velocity	all create ${tempext} 87287   # check this command.
+velocity	all create ${tempext} 87287   
 dump		dumpnpt all atom 1000 npt.out.dump
 thermo		${N}
 thermo_style custom step pe ke etotal press temp vol density lx ly lz
@@ -60,3 +63,6 @@ undump    dumpnvt
 unfix     rdfnvt
 uncompute rdfnvt
 uncompute msdnvt
+
+next      a
+jump      Lj.melt epsilonloop #it will again transfer the call to label epsilonloop line

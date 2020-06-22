@@ -17,7 +17,6 @@ variable a loop 10
 variable    epsilon equal 0.3+($a-1)*0.3 
 pair_coeff	1 1 ${epsilon} 1.0 2.5  # epsilon sigma and rcut is defined repectively
 
-minimize  1.0e-4 1.0e-6 100 1000
 
 neighbor	0.3 bin   #skin factor is taken to 0.3 
 neigh_modify	every 20 delay 0 check no
@@ -31,13 +30,17 @@ variable Nevery equal 100
 variable Nfreq equal 100000
 variable Nrepeat equal 100
 
+log log.lammps.${epsilon}
+thermo		${N}
+thermo_style custom step pe ke etotal press temp vol density lx ly lz
+
+minimize  1.0e-4 1.0e-6 100 1000
 reset_timestep 0
 
 #Using Npt to Calculate the properties
 velocity	all create ${tempext} 87287   
+
 dump		dumpnpt all atom 1000 nptdata.out.dump
-thermo		${N}
-thermo_style custom step pe ke etotal press temp vol density lx ly lz
 restart 50000 restrt1npt.out restrt2npt.out 
 
 fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}

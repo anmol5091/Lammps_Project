@@ -1,0 +1,68 @@
+# 3d Lennard-Jones melt
+
+units		lj #reduced unit
+atom_style	atomic  
+
+lattice		fcc 0.8442
+region		box block 0 10 0 10 0 10  #dimensions of the block
+create_box	1 box    
+
+region      atomblock block INF INF INF INF INF INF units box  #dimensions for the atom block
+create_atoms	1 random 2000 523383 atomblock  
+
+mass		1 1.0
+pair_style	lj/cut 3.5
+label epsilonloop
+variable a loop 10
+variable    epsilon equal 0.3+($a-1)*0.3 
+pair_coeff	1 1 ${epsilon} 1.0 2.5  # epsilon sigma and rcut is defined repectively
+
+minimize  1.0e-4 1.0e-6 100 1000
+
+neighbor	0.3 bin   #skin factor is taken to 0.3 
+neigh_modify	every 20 delay 0 check no
+timestep 0.005    #default for lj 
+variable N equal 1000
+variable tempext equal 0.3
+variable tdamp equal 1.0
+variable pext equal 1.0 
+variable pdamp equal 5.0
+variable Nevery equal 100
+variable Nfreq equal 100000
+variable Nrepeat equal 100
+
+reset_timestep 0
+
+#Using Npt to Calculate the properties
+velocity	all create ${tempext} 87287   
+dump		dumpnpt all atom 1000 nptdata.out.dump
+thermo		${N}
+thermo_style custom step pe ke etotal press temp vol density lx ly lz
+restart 50000 restrt1npt.out restrt2npt.out 
+
+fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
+run		  100000
+unfix   nptid
+undump  dumpnpt
+
+
+#Using Nvt to calculate the rdf
+
+compute     rdfnvt all rdf 100 
+fix rdfnvt all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvtdata.rdf mode vector
+compute msdnvt all msd com yes average yes
+dump       dumpnvt all atom 1000 nvtdata.out.dump
+thermo    ${N}
+thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
+restart 50000 restrt1nvt.out restrt2nvt.out 
+
+fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
+run       400000
+unfix     nvtid
+undump    dumpnvt
+unfix     rdfnvt
+uncompute rdfnvt
+uncompute msdnvt
+
+next      a
+jump      Lj.melt epsilonloop #it will again transfer the call to label epsilonloop line

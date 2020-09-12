@@ -8,7 +8,7 @@ LAMMPS FENE chain data file
            0  impropers
 
            2  atom types
-           2  bond types
+           1  bond types
            0  angle types
            0  dihedral types
            0  improper types
@@ -16,11 +16,6 @@ LAMMPS FENE chain data file
       -7.375942       7.375942 xlo xhi
       -7.375942       7.375942 ylo yhi
       -7.375942       7.375942 zlo zhi
-
-Masses
-
-  1  1.0
-  2  1.0
 
 Atoms
 

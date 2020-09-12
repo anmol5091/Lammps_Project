@@ -4,9 +4,9 @@ units 		lj # reduced
 dimension	3
 atom_style 	bond # angle can also be used but since angles are not defined for the polymer  bond is sufficient
 read_data 	out.data
-include 	forcefield.data 
+include 	  forcefield.data 
 
-minimize  1.0e-4 1.0e-6 100 1000
+minimize    1.0e-4 1.0e-6 100 1000
 
 neighbor	   0.3 bin   #skin factor is taken to 0.3 
 neigh_modify       every 20 delay 0 check no
@@ -17,7 +17,7 @@ group fluid type 2
 
 variable N equal 1000
 variable tempext equal 0.3
-variable tdamp equal 1.0
+variable tdamp equal 0.50
 variable pext equal 1.0 
 variable pdamp equal 5.0
 variable Nevery equal 100
@@ -35,8 +35,8 @@ thermo		${N}
 thermo_style    custom step pe ke etotal press temp vol density lx ly lz 2x 2y 2z
 restart         50000 restart1npt.out restart2npt.out 
 
-fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
-run		300000
+fix 		        nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
+run		          1000000
 unfix           nptid
 unfix           radav
 uncompute       radgy
@@ -45,22 +45,26 @@ undump          dumpnpt
 
 #Using Nvt to calculate the rdf for type 1
 
-compute      rdfnvt1 poly rdf 100 
+compute      rdfnvt1 poly rdf 500 1 1 1 2 2 2 
 fix          rdfnvt1 poly ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf1 mode vector
-compute      msdnvt1 poly msd com yes average yes
+
+compute      msdnvt1 poly msd
+
 dump         dumpnvt1 poly atom 1000 nvt1.out.dump
 thermo       ${N}
 thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
 restart      50000 restart11nvt.out restart12nvt.out 
 
 fix          nvtid1 poly nvt temp ${tempext} ${tempext} ${tdamp}
-run          300000
+run          1000000
+
 unfix        nvtid1
 undump       dumpnvt1
 unfix        rdfnvt1
 uncompute    rdfnvt1
 uncompute    msdnvt1
 
+# There is no need to run two times for calculation of RDF of different pairs. It can be done together. 
 
 #Using Nvt to calculate the rdf for type 2
 

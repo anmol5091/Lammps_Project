@@ -41,7 +41,7 @@ thermo_style custom step pe ke etotal press temp vol density lx ly lz
 restart 50000 restart1npt.out restart2npt.out 
 
 fix 		nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
-run		  300000
+run		  100000
 unfix   nptid
 undump  dumpnpt
 
@@ -57,7 +57,7 @@ thermo_style custom step pe ke etotal press temp vol c_msdnvt[4]
 restart 50000 restart1nvt.out restart2nvt.out 
 
 fix        nvtid all nvt temp ${tempext} ${tempext} ${tdamp}
-run       300000
+run       400000
 unfix     nvtid
 undump    dumpnvt
 unfix     rdfnvt

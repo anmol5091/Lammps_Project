@@ -43,19 +43,19 @@ uncompute       radgy
 undump          dumpnpt
 
 
-#Using Nvt to calculate the rdf for type 1
+#Using Nvt to calculate the rdf
 
-compute      rdfnvt1 poly rdf 500 1 1 1 2 2 2 
-fix          rdfnvt1 poly ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf1 mode vector
+compute      rdfnvt1 all rdf 500 1 1 1 2 2 2 
+fix          rdfnvt1 all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf1 mode vector
 
-compute      msdnvt1 poly msd
+compute      msdnvt1 all msd
 
-dump         dumpnvt1 poly atom 1000 nvt1.out.dump
+dump         dumpnvt1 all atom 1000 nvt1.out.dump
 thermo       ${N}
 thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
 restart      50000 restart11nvt.out restart12nvt.out 
 
-fix          nvtid1 poly nvt temp ${tempext} ${tempext} ${tdamp}
+fix          nvtid1 all nvt temp ${tempext} ${tempext} ${tdamp}
 run          1000000
 
 unfix        nvtid1
@@ -66,20 +66,3 @@ uncompute    msdnvt1
 
 # There is no need to run two times for calculation of RDF of different pairs. It can be done together. 
 
-#Using Nvt to calculate the rdf for type 2
-
-compute      rdfnvt2 fluid rdf 100 
-fix          rdfnvt2 fluid ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf2 mode vector
-compute      msdnvt2 fluid msd com yes average yes
-dump         dumpnvt2 fluid atom 1000 nvt2.out.dump
-thermo       ${N}
-thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
-restart      50000 restart21nvt.out restart22nvt.out 
-
-fix          nvtid2 fluid nvt temp ${tempext} ${tempext} ${tdamp}
-run          300000
-unfix        nvtid2
-undump       dumpnvt2
-unfix        rdfnvt2
-uncompute    rdfnvt2
-uncompute    msdnvt2

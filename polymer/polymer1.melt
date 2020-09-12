@@ -1,0 +1,68 @@
+# 3d Lennard-Jones melt
+
+units 		lj # reduced
+dimension	3
+atom_style 	bond # angle can also be used but since angles are not defined for the polymer  bond is sufficient
+read_data 	out.data
+include 	  forcefield.data 
+
+minimize    1.0e-4 1.0e-6 100 1000
+
+neighbor	   0.3 bin   #skin factor is taken to 0.3 
+neigh_modify       every 20 delay 0 check no
+timestep           0.005    #default for lj 
+
+group poly type 1
+group fluid type 2
+
+variable N equal 1000
+variable tempext equal 0.3
+variable tdamp equal 0.50
+variable pext equal 1.0 
+variable pdamp equal 5.0
+variable Nevery equal 100
+variable Nfreq equal 100000
+variable Nrepeat equal 100
+
+reset_timestep 0
+
+#Using Npt to Calculate the properties
+velocity	all create ${tempext} 87287   
+dump		dumpnpt all atom 1000 npt.out.dump
+compute         radgy poly gyration
+fix             radav poly ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_radgy file npt.radgy
+thermo		${N}
+thermo_style    custom step pe ke etotal press temp vol density lx ly lz 2x 2y 2z
+restart         50000 restart1npt.out restart2npt.out 
+
+fix 		        nptid all npt temp ${tempext} ${tempext} ${tdamp} iso ${pext} ${pext} ${pdamp}
+run		          1000000
+unfix           nptid
+unfix           radav
+uncompute       radgy
+undump          dumpnpt
+
+
+#Using Nvt to calculate the rdf
+
+compute      rdfnvt1 all rdf 500 1 1 1 2 2 2 
+fix          rdfnvt1 all ave/time ${Nevery} ${Nrepeat} ${Nfreq} c_rdfnvt[*] file nvt.rdf1 mode vector
+
+compute      msdnvt1 all msd
+
+dump         dumpnvt1 all atom 1000 nvt1.out.dump
+thermo       ${N}
+thermo_style custom step pe ke etotal press temp vol c_msdnvt[4] 
+restart      50000 restart11nvt.out restart12nvt.out 
+
+fix          nvtid1 all nvt temp ${tempext} ${tempext} ${tdamp}
+run          1000000
+
+unfix        nvtid1
+undump       dumpnvt1
+unfix        rdfnvt1
+uncompute    rdfnvt1
+uncompute    msdnvt1
+
+# There is no need to run two times for calculation of RDF of different pairs. It can be done together. 
+
